@@ -1,5 +1,8 @@
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
+import {
+  Switch,
+  Route
+} from 'react-router-dom';
 
 import './App.css';
 
@@ -7,39 +10,75 @@ import HomePage from './pages/homepage/homepage.component';
 import ShopPage from './pages/shop/shop.component';
 import SignInSignUpPage from './pages/sign-it-and-sign-up/sign-it-and-sign-up.component';
 import Header from './components/header/header.component';
-import {auth} from './firebase/firebase.utils'
+
+import {
+  auth,
+  createUserProfileDocoument
+} from './firebase/firebase.utils'
 
 class App extends React.Component {
-  constructor(){
+  constructor() {
     super();
-    this.state ={
+    this.state = {
       currentUser: null
     }
   }
 
   unsubscibeFromAuth = null;
 
-  componentDidMount(){
-    this.unsubscibeFromAuth = auth.onAuthStateChanged(user => {
-      this.setState({currentUser: user});
-      console.log(user);
-    })
+  componentDidMount() {
+    this.unsubscibeFromAuth = auth.onAuthStateChanged(async userAuth => {
+      if (userAuth) {
+        const userRef = await createUserProfileDocoument(userAuth);
+        userRef.onSnapshot(snapShot => {
+          this.setState({
+              currentUser: {
+                id: snapShot.id,
+                ...snapShot.data()
+              }
+            },
+            () => {
+              console.log(this.state);
+            }
+          );
+
+        });
+      } else {
+        this.setState({
+          currentUser: userAuth
+        });
+      }
+    });
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
     this.unsubscibeFromAuth();
   }
 
-  render(){
-    return (
-      <div>
-        <Header currentUser={this.state.currentUser}/>
-        <Switch>
-          <Route exact path='/' component={HomePage} />
-          <Route path='/shop' component={ShopPage} />
-          <Route path='/signin' component={SignInSignUpPage} />
-        </Switch>
-      </div>
+  render() {
+    return ( < div >
+      <
+      Header currentUser = {
+        this.state.currentUser
+      }
+      /> <Switch > <
+      Route exact path = '/'
+      component = {
+        HomePage
+      }
+      /> <
+      Route path = '/shop'
+      component = {
+        ShopPage
+      }
+      /> <
+      Route path = '/signin'
+      component = {
+        SignInSignUpPage
+      }
+      /> < /
+      Switch > <
+      /div>
     );
   }
 }

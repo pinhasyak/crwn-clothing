@@ -1,6 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
+// import { useRef } from 'react';
 
  const config = {
   apiKey: "AIzaSyDkM3GcSlkgk69O_jQhDOU9FlNGY3fvPMQ",
@@ -12,6 +13,28 @@ import 'firebase/auth';
   appId: "1:470309808122:web:e61713a249edd00795a643",
   measurementId: "G-F1RBCVXCT5"
 };
+
+export const createUserProfileDocoument = async (userAuth, additionaData) => {
+  if(!userAuth) return;
+
+  const userRef = firestore.doc(`users/${userAuth.uid}`);
+  const snapShot = await userRef.get();
+  if(!snapShot.exists){
+    const {displayName, email} = userAuth;
+    const createdAt = new Date();
+    try{
+      await userRef.set({
+        displayName,
+        email,
+        createdAt,
+        ...additionaData
+      });
+    } catch(error){
+      console.log('error creating user', error.message);
+    } 
+  }
+  return userRef;
+}
 
 firebase.initializeApp(config);
 
